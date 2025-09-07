@@ -294,14 +294,23 @@ ${process}
             URL.revokeObjectURL(url);
         }
 
-        // Function to handle text-to-speech for the recipe
+        // Function to handle text-to-speech for the recipe with pause/resume
         function speakRecipe() {
-            if (speechSynthesis.speaking) {
-                speechSynthesis.cancel();
-                listenBtn.textContent = 'Listen to Recipe';
+            // Check if audio is currently paused. If so, resume.
+            if (speechSynthesis.paused) {
+                speechSynthesis.resume();
+                listenBtn.textContent = 'Pause';
                 return;
             }
 
+            // If audio is currently speaking (and not paused), pause it.
+            if (speechSynthesis.speaking) {
+                speechSynthesis.pause();
+                listenBtn.textContent = 'Resume';
+                return;
+            }
+
+            // If no audio is playing, start a new narration.
             if (resultContainer.classList.contains('hidden')) {
                 showError("Please generate a recipe first before trying to listen.");
                 return;
@@ -318,10 +327,13 @@ ${process}
             utterance.pitch = 1.0;
             
             utterance.onstart = () => {
-                listenBtn.textContent = 'Stop';
+                listenBtn.textContent = 'Pause';
             };
             utterance.onend = () => {
                 listenBtn.textContent = 'Listen to Recipe';
+            };
+            utterance.onpause = () => {
+                listenBtn.textContent = 'Resume';
             };
             
             speechSynthesis.speak(utterance);
