@@ -108,6 +108,10 @@
                     <ol id="processList" class="list-decimal list-inside space-y-2 text-gray-600"></ol>
                 </div>
             </div>
+            
+            <!-- New TTS button -->
+            <button id="listenBtn" class="w-full mt-2 bg-purple-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-purple-700 transition-all duration-300 transform hover:scale-105 hidden">Listen to Recipe</button>
+
 
             <!-- Error Message -->
             <div id="errorContainer" class="hidden w-full mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg" role="alert">
@@ -129,7 +133,7 @@
         
     <!-- Footer is now a sibling of the main content container -->
     <footer class="w-full text-center text-gray-500 mt-8 text-sm">
-        Copyright 2025-2026 LESTERPOGI
+        Copyright 2025-2026 LRGarra
     </footer>
 
     <script>
@@ -138,6 +142,7 @@
         const servingsInput = document.getElementById('servingsInput');
         const button = document.getElementById('getRecipeBtn');
         const downloadBtn = document.getElementById('downloadBtn');
+        const listenBtn = document.getElementById('listenBtn');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const resultContainer = document.getElementById('resultContainer');
         const recipeNameEl = document.getElementById('recipeName');
@@ -149,20 +154,33 @@
         const infoContainer = document.getElementById('infoContainer');
         const infoMessageEl = document.getElementById('infoMessage');
 
-        // Function to show an error message
+        // Function to speak text, canceling any previous speech
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Function to show an error message and speak it
         function showError(message) {
             errorContainer.classList.remove('hidden');
             errorContainer.classList.add('shake');
             errorMessageEl.textContent = message;
+            speakText(message);
             setTimeout(() => {
                 errorContainer.classList.remove('shake');
             }, 500);
         }
 
-        // Function to show an info message
+        // Function to show an info message and speak it
         function showInfo(message) {
             infoContainer.classList.remove('hidden');
             infoMessageEl.textContent = message;
+            speakText(message);
         }
 
         // Function to hide all result and info messages
@@ -170,6 +188,7 @@
             errorContainer.classList.add('hidden');
             resultContainer.classList.add('hidden');
             infoContainer.classList.add('hidden');
+            listenBtn.classList.add('hidden'); // Also hide the listen button
         }
 
         // Updated function to call the Vercel Serverless Function
@@ -221,6 +240,7 @@
                             processListEl.appendChild(li);
                         });
                         resultContainer.classList.remove('hidden');
+                        listenBtn.classList.remove('hidden'); // Show the listen button on success
                     } else {
                         showError("Invalid recipe data returned.");
                     }
@@ -274,9 +294,43 @@ ${process}
             URL.revokeObjectURL(url);
         }
 
+        // Function to handle text-to-speech for the recipe
+        function speakRecipe() {
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+                listenBtn.textContent = 'Listen to Recipe';
+                return;
+            }
+
+            if (resultContainer.classList.contains('hidden')) {
+                showError("Please generate a recipe first before trying to listen.");
+                return;
+            }
+
+            const recipeName = recipeNameEl.textContent;
+            const ingredients = Array.from(ingredientsListEl.children).map(li => li.textContent).join(', ');
+            const process = Array.from(processListEl.children).map(li => li.textContent).join(' ');
+
+            const textToSpeak = `Here is your recipe for ${recipeName}. Ingredients: ${ingredients}. Instructions: ${process}`;
+            
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            
+            utterance.onstart = () => {
+                listenBtn.textContent = 'Stop';
+            };
+            utterance.onend = () => {
+                listenBtn.textContent = 'Listen to Recipe';
+            };
+            
+            speechSynthesis.speak(utterance);
+        }
+
         // Event listeners
         button.addEventListener('click', getScaledRecipe);
         downloadBtn.addEventListener('click', downloadRecipe);
+        listenBtn.addEventListener('click', speakRecipe);
 
         dishNameInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
