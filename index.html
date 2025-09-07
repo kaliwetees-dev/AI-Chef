@@ -363,7 +363,7 @@ ${process}
                 return prefix + step + ". ";
             }).join(' ');
 
-            const textToSpeak = `Here is your recipe for ${recipeName}. For the ingredients, you will need: ${ingredientsString}. Now, for the instructions. ${processString}`;
+            const textToSpeak = `Alright, here is the recipe for ${recipeName}. Let's start with the ingredients. You'll need: ${ingredientsString}. Now, let's go over the cooking process. ${processString}`;
             
             const utterance = new SpeechSynthesisUtterance(textToSpeak);
             utterance.rate = 1.0;
