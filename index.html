@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Recipe Chef</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        :root {
+            --color-cream: #f9f6f1;
+            --color-soft-orange: #ffab73;
+            --color-sage-green: #a7c957;
+            --color-dark-text: #333;
+            --color-light-text: #fff;
+            --shadow-subtle: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--color-cream);
+            color: var(--color-dark-text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            padding: 40px;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        h1 {
+            color: var(--color-soft-orange);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .input-group input {
+            flex-grow: 1;
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: 'Poppins', sans-serif;
+            color: var(--color-dark-text);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--color-sage-green);
+            box-shadow: 0 0 0 3px rgba(167, 201, 87, 0.2);
+        }
+
+        .input-group button {
+            padding: 15px 30px;
+            border: none;
+            background-color: var(--color-soft-orange);
+            color: var(--color-light-text);
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .input-group button:hover {
+            background-color: #e69a63;
+            transform: translateY(-2px);
+        }
+
+        .recipe-card {
+            background-color: var(--color-cream);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: left;
+            box-shadow: var(--shadow-subtle);
+            animation: fadeIn 0.8s ease-in-out;
+            margin-top: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation-fill-mode: forwards;
+        }
+
+        .recipe-card h2 {
+            color: var(--color-soft-orange);
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .recipe-card h3 {
+            color: var(--color-sage-green);
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--color-sage-green);
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        .recipe-card ul, .recipe-card ol {
+            padding-left: 20px;
+            line-height: 1.8;
+        }
+
+        .recipe-card li {
+            margin-bottom: 10px;
+        }
+
+        .warning-message {
+            color: #d9534f;
+            font-weight: 600;
+            margin-top: 15px;
+            animation: shake 0.5s ease-in-out;
+            opacity: 0;
+            transform: translateY(-10px);
+            animation-fill-mode: forwards;
+        }
+
+        .disclaimer {
+            margin-top: 30px;
+            font-size: 0.8em;
+            color: #888;
+            text-align: center;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            20%, 60% {
+                transform: translateX(-5px);
+            }
+            40%, 80% {
+                transform: translateX(5px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>👨‍🍳 The AI Chef</h1>
+    <p class="subtitle">Your personal recipe assistant. What are you in the mood for?</p>
+    <div class="input-group">
+        <input type="text" id="recipeInput" placeholder="Enter a recipe name (e.g., Pancakes) and servings (e.g., 4)">
+        <button id="submitBtn">Generate</button>
+    </div>
+    
+    <div id="resultContainer"></div>
+</div>
+
+<script>
+    const recipes = {
+        'pancakes': {
+            ingredients: {
+                'all-purpose flour': { base: 1.5, unit: 'cups' },
+                'baking powder': { base: 3.5, unit: 'teaspoons' },
+                'salt': { base: 0.25, unit: 'teaspoons' },
+                'sugar': { base: 1, unit: 'tablespoon' },
+                'milk': { base: 1.25, unit: 'cups' },
+                'egg': { base: 1, unit: 'large' },
+                'melted butter': { base: 3, unit: 'tablespoons' }
+            },
+            procedure: [
+                "In a large bowl, whisk together the flour, baking powder, salt, and sugar.",
+                "In a separate bowl, whisk together the milk, egg, and melted butter.",
+                "Pour the wet ingredients into the dry ingredients and stir until just combined. Don't overmix; a few lumps are fine.",
+                "Heat a lightly oiled griddle or frying pan over medium-high heat.",
+                "Pour about 1/4 cup of batter per pancake. Cook for 2-3 minutes, until bubbles appear on the surface and the edges look dry.",
+                "Flip and cook for another 1-2 minutes until golden brown.",
+                "Serve immediately with your favorite toppings."
+            ],
+            baseServings: 4
+        },
+        'spaghetti bolognese': {
+            ingredients: {
+                'ground beef': { base: 1, unit: 'lb' },
+                'onion': { base: 1, unit: 'medium' },
+                'garlic': { base: 2, unit: 'cloves' },
+                'crushed tomatoes': { base: 28, unit: 'oz' },
+                'tomato paste': { base: 6, unit: 'oz' },
+                'beef broth': { base: 1, unit: 'cup' },
+                'dried oregano': { base: 1, unit: 'teaspoon' },
+                'spaghetti': { base: 1, unit: 'lb' }
+            },
+            procedure: [
+                "Brown the ground beef in a large pot or Dutch oven over medium-high heat. Drain excess fat.",
+                "Add the chopped onion and minced garlic. Cook until softened, about 5 minutes.",
+                "Stir in the crushed tomatoes, tomato paste, beef broth, and oregano. Season with salt and pepper to taste.",
+                "Bring to a simmer, then reduce heat to low, cover, and let it simmer for at least 30 minutes, or up to several hours for richer flavor.",
+                "Cook spaghetti according to package directions.",
+                "Serve the bolognese sauce over the cooked spaghetti, topped with grated Parmesan cheese."
+            ],
+            baseServings: 4
+        }
+    };
+
+    const input = document.getElementById('recipeInput');
+    const button = document.getElementById('submitBtn');
+    const resultContainer = document.getElementById('resultContainer');
+
+    function createRecipeCard(dish, servings) {
+        const recipe = recipes[dish.toLowerCase()];
+        if (!recipe) return null;
+
+        const servingRatio = servings / recipe.baseServings;
+        const ingredientsList = Object.entries(recipe.ingredients)
+            .map(([name, { base, unit }]) => {
+                const amount = base * servingRatio;
+                const formattedAmount = Number.isInteger(amount) ? amount : amount.toFixed(2);
+                return `<li><strong>${formattedAmount} ${unit}</strong> of ${name}</li>`;
+            })
+            .join('');
+
+        const procedureList = recipe.procedure
+            .map((step, index) => `<li><strong>Step ${index + 1}:</strong> ${step}</li>`)
+            .join('');
+
+        return `
+            <div class="recipe-card">
+                <h2>${dish} (${servings} servings)</h2>
+                <h3>Ingredients</h3>
+                <ul>
+                    ${ingredientsList}
+                </ul>
+                <h3>Procedure</h3>
+                <ol>
+                    ${procedureList}
+                </ol>
+            </div>
+            <p class="disclaimer">
+                ⚠️ <strong>Disclaimer:</strong> Recipes are AI-generated and may not always be accurate. Please adjust to taste and verify for dietary or allergy restrictions.
+            </p>
+        `;
+    }
+
+    function showWarning(message) {
+        resultContainer.innerHTML = `<p class="warning-message">❌ ${message}</p>`;
+        setTimeout(() => {
+            const warning = document.querySelector('.warning-message');
+            if (warning) {
+                warning.style.opacity = 1;
+                warning.style.transform = 'translateY(0)';
+            }
+        }, 10);
+    }
+
+    function handleSubmit() {
+        const value = input.value.trim();
+        const parts = value.split(/\s+servings/i);
+        const dish = parts[0].trim();
+        const servings = parts[1] ? parseInt(parts[1].trim()) : 4;
+
+        if (!dish || isNaN(servings) || servings <= 0 || !recipes[dish.toLowerCase()]) {
+            showWarning("That doesn't look like a recipe. Please try again.");
+            return;
+        }
+
+        const recipeHtml = createRecipeCard(dish, servings);
+        if (recipeHtml) {
+            resultContainer.innerHTML = recipeHtml;
+            setTimeout(() => {
+                const recipeCard = document.querySelector('.recipe-card');
+                if (recipeCard) {
+                    recipeCard.style.opacity = 1;
+                    recipeCard.style.transform = 'translateY(0)';
+                }
+            }, 10);
+        } else {
+            showWarning("That recipe isn't in our database. Please try another.");
+        }
+    }
+
+    button.addEventListener('click', handleSubmit);
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleSubmit();
+        }
+    });
+</script>
+
+</body>
+</html>
