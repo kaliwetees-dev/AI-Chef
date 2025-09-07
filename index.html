@@ -196,7 +196,12 @@
                 error3: "Failed to fetch recipe. Please try again later.",
                 info1: "No recipe found for that item.",
                 warning1: "Please generate a recipe first before trying to download.",
-                warning2: "Please generate a recipe first before trying to listen."
+                warning2: "Please generate a recipe first before trying to listen.",
+                speech: {
+                    intro: "Here is your recipe for %s. For the ingredients, you will need: %s. Now, for the instructions. %s",
+                    ingredientsConjunction: " and ",
+                    processPrefixes: ["First, ", "Next, ", "Finally, "]
+                }
             },
             'fil-PH': {
                 tagline: "I-type ang pangalan ng ulam at bilang ng servings para makakuha ng recipe.",
@@ -216,7 +221,12 @@
                 error3: "Hindi makuha ang recipe. Paki-subukang muli mamaya.",
                 info1: "Walang recipe na natagpuan para sa bagay na iyon.",
                 warning1: "Mangyaring gumawa muna ng recipe bago subukang mag-download.",
-                warning2: "Mangyaring gumawa muna ng recipe bago subukang pakinggan."
+                warning2: "Mangyaring gumawa muna ng recipe bago subukang pakinggan.",
+                speech: {
+                    intro: "Narito ang iyong recipe para sa %s. Para sa mga sangkap, kakailanganin mo: %s. Ngayon, para sa mga tagubilin. %s",
+                    ingredientsConjunction: ", at ",
+                    processPrefixes: ["Una, ", "Susunod, ", "Panghuli, "]
+                }
             }
         };
 
@@ -414,15 +424,33 @@ ${process}
             }
 
             const recipeName = recipeNameEl.textContent;
-            const ingredients = Array.from(ingredientsListEl.children).map(li => li.textContent).join(', ');
-            const process = Array.from(processListEl.children).map(li => li.textContent).join(' ');
+            const ingredients = Array.from(ingredientsListEl.children).map(li => li.textContent);
+            const process = Array.from(processListEl.children).map(li => li.textContent);
+            const lang = languageSelect.value;
+            const speechTranslations = translations[lang].speech;
 
-            const textToSpeak = `Here is your recipe for ${recipeName}. Ingredients: ${ingredients}. Instructions: ${process}`;
+            const ingredientsString = ingredients.length > 1
+                ? ingredients.slice(0, -1).join(', ') + speechTranslations.ingredientsConjunction + ingredients.slice(-1)
+                : ingredients.join('');
+
+            const processString = process.map((step, index) => {
+                let prefix = "";
+                if (index === 0) {
+                    prefix = speechTranslations.processPrefixes[0];
+                } else if (index === process.length - 1) {
+                    prefix = speechTranslations.processPrefixes[2];
+                } else {
+                    prefix = speechTranslations.processPrefixes[1];
+                }
+                return prefix + step + ". ";
+            }).join(' ');
+
+            const textToSpeak = speechTranslations.intro.replace('%s', recipeName).replace('%s', ingredientsString).replace('%s', processString);
             
             const utterance = new SpeechSynthesisUtterance(textToSpeak);
             utterance.rate = 1.0;
             utterance.pitch = 1.0;
-            utterance.lang = languageSelect.value;
+            utterance.lang = lang;
             
             utterance.onstart = () => {
                 listenBtn.textContent = 'Pause';
