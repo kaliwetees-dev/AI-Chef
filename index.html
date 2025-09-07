@@ -1,229 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virtual Chef</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-image: url('https://images.unsplash.com/photo-1546069901-d7a83d47f999?ixlib=rb-4.0.3&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1920&h=1080&fit=crop');
-            background-size: cover;
-            background-position: center;
-        }
-        .container-shadow {
-            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
-            background-color: rgba(255, 252, 249, 0.8);
-        }
-        .loading-spinner {
-            border: 4px solid #f0e6e6;
-            border-top: 4px solid #84cc16; /* Sage green spinner */
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out forwards;
-            opacity: 0;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .shake {
-            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-            transform: translate3d(0, 0, 0);
-            backface-visibility: hidden;
-            perspective: 1000px;
-        }
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Chef</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1546069901-d7a83d47f999?ixlib=rb-4.0.3&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1920&h=1080&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+        .container-shadow {
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+            background-color: rgba(255, 252, 249, 0.9); /* Slightly less transparent */
+            backdrop-filter: blur(8px); /* Add a subtle blur effect */
+        }
+        .loading-spinner {
+            border: 4px solid #f0e6e6;
+            border-top: 4px solid #84cc16; /* Sage green spinner */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out forwards;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+    </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
-    <div class="flex flex-col items-center justify-center w-full">
-        <div class="rounded-2xl p-6 md:p-8 w-full max-w-2xl container-shadow flex flex-col items-center">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2 text-center">👨‍🍳 Virtual Chef</h1>
-            <p class="text-center text-gray-500 mb-6">Enter a dish and your desired servings to get a tailored recipe.</p>
+    <div class="flex flex-col items-center justify-center w-full">
+        <!-- Main content box -->
+        <div class="rounded-2xl p-6 md:p-8 w-full max-w-xl container-shadow flex flex-col items-center">
+            <h1 class="text-4xl font-extrabold text-gray-800 mb-2 text-center">👨‍🍳 Virtual Chef</h1>
+            <p class="text-center text-gray-600 mb-6 font-medium">Enter a dish and your desired servings to get a tailored recipe.</p>
 
-            <div class="w-full space-y-4 mb-4">
-                <div>
-                    <label for="dishNameInput" class="block text-sm font-medium text-gray-700 mb-1">Dish Name</label>
-                    <input type="text" id="dishNameInput" placeholder="e.g., Lasagna" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 transition-all duration-200" autocomplete="off">
-                </div>
-                <div>
-                    <label for="servingsInput" class="block text-sm font-medium text-gray-700 mb-1">Number of Servings</label>
-                    <input type="number" id="servingsInput" placeholder="e.g., 4" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 transition-all duration-200">
-                </div>
-            </div>
+            <!-- Input fields -->
+            <div class="w-full space-y-4 mb-4">
+                <div>
+                    <label for="dishNameInput" class="block text-sm font-medium text-gray-700 mb-1">Dish Name</label>
+                    <input type="text" id="dishNameInput" placeholder="e.g., Lasagna" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-200" autocomplete="off">
+                </div>
+                <div>
+                    <label for="servingsInput" class="block text-sm font-medium text-gray-700 mb-1">Number of Servings</label>
+                    <input type="number" id="servingsInput" placeholder="e.g., 4" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-200">
+                </div>
+            </div>
 
-            <button id="getRecipeBtn" class="w-full bg-[#f97316] text-white font-semibold py-3 px-6 rounded-lg hover:bg-orange-600 transition-all duration-300">Get Recipe</button>
+            <!-- Get Recipe button -->
+            <button id="getRecipeBtn" class="w-full bg-[#f97316] text-white font-semibold py-3 px-6 rounded-lg hover:bg-orange-600 transition-all duration-300 transform hover:scale-105">Get Recipe</button>
 
-            <div id="loadingIndicator" class="hidden my-6">
-                <div class="loading-spinner"></div>
-                <p class="mt-2 text-gray-600">Preparing your recipe...</p>
-            </div>
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="hidden my-6 flex flex-col items-center">
+                <div class="loading-spinner"></div>
+                <p class="mt-2 text-gray-600">Preparing your recipe...</p>
+            </div>
 
-            <div id="resultContainer" class="hidden w-full mt-6 fade-in">
-                <div class="p-6 bg-[#fdf2e8] rounded-lg border border-[#fbd38d]">
-                    <h2 id="recipeName" class="text-2xl font-bold text-gray-800 mb-2"></h2>
-                    
-                    <p id="servings" class="text-gray-600 text-sm mb-4"></p>
-                    
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Ingredients:</h3>
-                    <ul id="ingredientsList" class="list-disc list-inside space-y-1 text-gray-600 mb-4"></ul>
+            <!-- Result Container -->
+            <div id="resultContainer" class="hidden w-full mt-6 fade-in">
+                <div class="p-6 bg-white rounded-lg border border-gray-200 shadow-md">
+                    <h2 id="recipeName" class="text-2xl font-bold text-gray-800 mb-2"></h2>
+                    <p id="servings" class="text-gray-600 text-sm mb-4"></p>
+                    
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Ingredients:</h3>
+                    <ul id="ingredientsList" class="list-disc list-inside space-y-1 text-gray-600 mb-4"></ul>
 
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Instructions:</h3>
-                    <ol id="processList" class="list-decimal list-inside space-y-2 text-gray-600"></ol>
-                </div>
-            </div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Instructions:</h3>
+                    <ol id="processList" class="list-decimal list-inside space-y-2 text-gray-600"></ol>
+                </div>
+            </div>
 
-            <div id="errorContainer" class="hidden w-full mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg" role="alert">
-                <p id="errorMessage" class="font-medium"></p>
-            </div>
-            
-            <div id="infoContainer" class="hidden w-full mt-6 p-4 bg-lime-100 border border-lime-400 text-lime-700 rounded-lg" role="alert">
-                <p id="infoMessage" class="font-medium"></p>
-            </div>
+            <!-- Error Message -->
+            <div id="errorContainer" class="hidden w-full mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg" role="alert">
+                <p id="errorMessage" class="font-medium"></p>
+            </div>
+            
+            <!-- Info Message -->
+            <div id="infoContainer" class="hidden w-full mt-6 p-4 bg-lime-100 border border-lime-400 text-lime-700 rounded-lg" role="alert">
+                <p id="infoMessage" class="font-medium"></p>
+            </div>
 
-                        <div class="w-full bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg mt-6">
-                <p class="font-medium">Disclaimer</p>
-                <p class="text-sm">These recipes are generated by AI. Use your best judgment when preparing the dishes and consider consulting a professional resource for critical dietary or safety information.</p>
-            </div>
-        </div>
-        
-                <footer class="w-full text-center text-gray-500 mt-8 text-sm">
-            Copyright 2025-2026 LRGarra
-        </footer>
-    </div>
+            <!-- Disclaimer -->
+            <div class="w-full bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg mt-6">
+                <p class="font-medium">Disclaimer</p>
+                <p class="text-sm">These recipes are generated by AI. Use your best judgment when preparing the dishes and consider consulting a professional resource for critical dietary or safety information.</p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="w-full text-center text-gray-500 mt-8 text-sm">
+            Copyright 2025-2026 - LESTERPOGI
+        </footer>
+    </div>
 
-    <script>
-        // DOM element references
-        const dishNameInput = document.getElementById('dishNameInput');
-        const servingsInput = document.getElementById('servingsInput');
-        const button = document.getElementById('getRecipeBtn');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const resultContainer = document.getElementById('resultContainer');
-        const recipeNameEl = document.getElementById('recipeName');
-        const servingsEl = document.getElementById('servings');
-        const ingredientsListEl = document.getElementById('ingredientsList');
-        const processListEl = document.getElementById('processList');
-        const errorContainer = document.getElementById('errorContainer');
-        const errorMessageEl = document.getElementById('errorMessage');
-        const infoContainer = document.getElementById('infoContainer');
-        const infoMessageEl = document.getElementById('infoMessage');
+    <script>
+        // DOM element references
+        const dishNameInput = document.getElementById('dishNameInput');
+        const servingsInput = document.getElementById('servingsInput');
+        const button = document.getElementById('getRecipeBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const resultContainer = document.getElementById('resultContainer');
+        const recipeNameEl = document.getElementById('recipeName');
+        const servingsEl = document.getElementById('servings');
+        const ingredientsListEl = document.getElementById('ingredientsList');
+        const processListEl = document.getElementById('processList');
+        const errorContainer = document.getElementById('errorContainer');
+        const errorMessageEl = document.getElementById('errorMessage');
+        const infoContainer = document.getElementById('infoContainer');
+        const infoMessageEl = document.getElementById('infoMessage');
 
-        // Function to show an error message
-        function showError(message) {
-            errorContainer.classList.remove('hidden');
-            errorContainer.classList.add('shake');
-            errorMessageEl.textContent = message;
-            setTimeout(() => {
-                errorContainer.classList.remove('shake');
-            }, 500);
-        }
+        // Function to show an error message
+        function showError(message) {
+            errorContainer.classList.remove('hidden');
+            errorContainer.classList.add('shake');
+            errorMessageEl.textContent = message;
+            setTimeout(() => {
+                errorContainer.classList.remove('shake');
+            }, 500);
+        }
 
-        // Function to show an info message
-        function showInfo(message) {
-            infoContainer.classList.remove('hidden');
-            infoMessageEl.textContent = message;
-        }
+        // Function to show an info message
+        function showInfo(message) {
+            infoContainer.classList.remove('hidden');
+            infoMessageEl.textContent = message;
+        }
 
-        // Function to hide all result and info messages
-        function hideAllMessages() {
-            errorContainer.classList.add('hidden');
-            resultContainer.classList.add('hidden');
-            infoContainer.classList.add('hidden');
-        }
+        // Function to hide all result and info messages
+        function hideAllMessages() {
+            errorContainer.classList.add('hidden');
+            resultContainer.classList.add('hidden');
+            infoContainer.classList.add('hidden');
+        }
 
-        // Updated function to call the Vercel Serverless Function
-        async function getScaledRecipe() {
-            const dishName = dishNameInput.value.trim();
-            const servings = servingsInput.value.trim();
+        // Updated function to call the Vercel Serverless Function
+        async function getScaledRecipe() {
+            const dishName = dishNameInput.value.trim();
+            const servings = servingsInput.value.trim();
 
-            if (!dishName || !servings || isNaN(parseInt(servings))) {
-                showError("Please enter a dish name and a valid number of servings.");
-                return;
-            }
+            if (!dishName || !servings || isNaN(parseInt(servings))) {
+                showError("Please enter a dish name and a valid number of servings.");
+                return;
+            }
 
-            hideAllMessages();
-            loadingIndicator.classList.remove('hidden');
-            button.disabled = true;
+            hideAllMessages();
+            loadingIndicator.classList.remove('hidden');
+            button.disabled = true;
 
-            try {
-                const response = await fetch('/api/recipe', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ dishName, servings }),
-                });
+            try {
+                const response = await fetch('/api/recipe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ dishName, servings }),
+                });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || "Failed to fetch recipe.");
-                }
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || "Failed to fetch recipe.");
+                }
 
-                const data = await response.json();
+                const data = await response.json();
 
-                if (data.isRecipeFound) {
-                    if (data.recipeName && data.servings !== undefined && data.ingredients && data.process) {
-                        recipeNameEl.textContent = data.recipeName;
-                        servingsEl.textContent = `Servings: ${data.servings}`;
-                        
-                        ingredientsListEl.innerHTML = '';
-                        data.ingredients.forEach(ingredient => {
-                            const li = document.createElement('li');
-                            li.textContent = ingredient;
-                            ingredientsListEl.appendChild(li);
-                        });
+                if (data.isRecipeFound) {
+                    if (data.recipeName && data.servings !== undefined && data.ingredients && data.process) {
+                        recipeNameEl.textContent = data.recipeName;
+                        servingsEl.textContent = `Servings: ${data.servings}`;
+                        
+                        ingredientsListEl.innerHTML = '';
+                        data.ingredients.forEach(ingredient => {
+                            const li = document.createElement('li');
+                            li.textContent = ingredient;
+                            ingredientsListEl.appendChild(li);
+                        });
 
-                        processListEl.innerHTML = '';
-                        data.process.forEach(step => {
-                            const li = document.createElement('li');
-                            li.textContent = step;
-                            processListEl.appendChild(li);
-                        });
-                        resultContainer.classList.remove('hidden');
-                    } else {
-                        showError("Invalid recipe data returned.");
-                    }
-                } else {
-                    showInfo(data.message || "No recipe found for that item.");
-                }
+                        processListEl.innerHTML = '';
+                        data.process.forEach(step => {
+                            const li = document.createElement('li');
+                            li.textContent = step;
+                            processListEl.appendChild(li);
+                        });
+                        resultContainer.classList.remove('hidden');
+                    } else {
+                        showError("Invalid recipe data returned.");
+                    }
+                } else {
+                    showInfo(data.message || "No recipe found for that item.");
+                }
 
-            } catch (error) {
-                console.error("Fetch error:", error);
-                showError(error.message || "Failed to fetch recipe. Please try again later.");
-            } finally {
-                loadingIndicator.classList.add('hidden');
-                button.disabled = false;
-            }
-        }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                showError(error.message || "Failed to fetch recipe. Please try again later.");
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                button.disabled = false;
+            }
+        }
 
-        // Event listeners
-        button.addEventListener('click', getScaledRecipe);
-        dishNameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                getScaledRecipe();
-            }
-        });
-        servingsInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                getScaledRecipe();
-            }
-        });
-    </script>
+        // Event listeners
+        button.addEventListener('click', getScaledRecipe);
+        dishNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                getScaledRecipe();
+            }
+        });
+        servingsInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                getScaledRecipe();
+            }
+        });
+    </script>
 </body>
 </html>
