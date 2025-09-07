@@ -153,15 +153,41 @@
         const errorMessageEl = document.getElementById('errorMessage');
         const infoContainer = document.getElementById('infoContainer');
         const infoMessageEl = document.getElementById('infoMessage');
+        
+        // Variable to hold the female voice
+        let femaleVoice = null;
+        
+        // Function to find a female voice from the available voices
+        function getFemaleVoice() {
+            const voices = speechSynthesis.getVoices();
+            for (let i = 0; i < voices.length; i++) {
+                if (voices[i].name.toLowerCase().includes('female')) {
+                    return voices[i];
+                }
+            }
+            return null;
+        }
+
+        // Set the female voice on window load
+        window.onload = () => {
+            femaleVoice = getFemaleVoice();
+            if (!femaleVoice) {
+                // If voices are not loaded yet, wait for them to be loaded
+                speechSynthesis.onvoiceschanged = () => {
+                    femaleVoice = getFemaleVoice();
+                };
+            }
+        };
 
         // Function to speak text, canceling any previous speech
         function speakText(text) {
             if ('speechSynthesis' in window) {
                 speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 1.0;
-                utterance.pitch = 1.0;
                 utterance.lang = "en-US";
+                if (femaleVoice) {
+                    utterance.voice = femaleVoice;
+                }
                 speechSynthesis.speak(utterance);
             }
         }
@@ -343,6 +369,9 @@ ${process}
             utterance.rate = 1.0;
             utterance.pitch = 1.0;
             utterance.lang = "en-US";
+            if (femaleVoice) {
+                utterance.voice = femaleVoice;
+            }
             
             utterance.onstart = () => {
                 listenBtn.textContent = 'Pause';
