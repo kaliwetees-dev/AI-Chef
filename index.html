@@ -109,10 +109,6 @@
                 </div>
             </div>
             
-            <!-- New TTS button -->
-            <button id="listenBtn" class="w-full mt-2 bg-purple-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-purple-700 transition-all duration-300 transform hover:scale-105 hidden">Listen to Recipe</button>
-
-
             <!-- Error Message -->
             <div id="errorContainer" class="hidden w-full mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg" role="alert">
                 <p id="errorMessage" class="font-medium"></p>
@@ -142,7 +138,6 @@
         const servingsInput = document.getElementById('servingsInput');
         const button = document.getElementById('getRecipeBtn');
         const downloadBtn = document.getElementById('downloadBtn');
-        const listenBtn = document.getElementById('listenBtn');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const resultContainer = document.getElementById('resultContainer');
         const recipeNameEl = document.getElementById('recipeName');
@@ -215,7 +210,6 @@
             errorContainer.classList.add('hidden');
             resultContainer.classList.add('hidden');
             infoContainer.classList.add('hidden');
-            listenBtn.classList.add('hidden'); // Also hide the listen button
         }
 
         // Function to call the Vercel Serverless Function
@@ -267,7 +261,6 @@
                             processListEl.appendChild(li);
                         });
                         resultContainer.classList.remove('hidden');
-                        listenBtn.classList.remove('hidden'); // Show the listen button on success
                     } else {
                         showError("Invalid recipe data returned.");
                     }
@@ -321,75 +314,9 @@ ${process}
             URL.revokeObjectURL(url);
         }
 
-        // Function to handle text-to-speech for the recipe with pause/resume
-        function speakRecipe() {
-            // Check if audio is currently paused. If so, resume.
-            if (speechSynthesis.paused) {
-                speechSynthesis.resume();
-                listenBtn.textContent = 'Pause';
-                return;
-            }
-
-            // If audio is currently speaking (and not paused), pause it.
-            if (speechSynthesis.speaking) {
-                speechSynthesis.pause();
-                listenBtn.textContent = 'Resume';
-                return;
-            }
-
-            // If no audio is playing, start a new narration.
-            if (resultContainer.classList.contains('hidden')) {
-                showError("Please generate a recipe first before trying to listen.");
-                return;
-            }
-
-            const recipeName = recipeNameEl.textContent;
-            const ingredients = Array.from(ingredientsListEl.children).map(li => li.textContent);
-            const process = Array.from(processListEl.children).map(li => li.textContent);
-
-            const ingredientsString = ingredients.length > 1
-                ? ingredients.slice(0, -1).join(', ') + `, and ` + ingredients.slice(-1)
-                : ingredients.join('');
-
-            const processString = process.map((step, index) => {
-                let prefix = "";
-                if (index === 0) {
-                    prefix = "First, ";
-                } else if (index === process.length - 1) {
-                    prefix = "Finally, ";
-                } else {
-                    prefix = "Next, ";
-                }
-                return prefix + step + ". ";
-            }).join(' ');
-
-            const textToSpeak = `Alright, here is the recipe for ${recipeName}. Let's start with the ingredients. You'll need: ${ingredientsString}. Now, let's go over the cooking process. ${processString}`;
-            
-            const utterance = new SpeechSynthesisUtterance(textToSpeak);
-            utterance.rate = 1.0;
-            utterance.pitch = 1.0;
-            utterance.lang = "en-US";
-            if (femaleVoice) {
-                utterance.voice = femaleVoice;
-            }
-            
-            utterance.onstart = () => {
-                listenBtn.textContent = 'Pause';
-            };
-            utterance.onend = () => {
-                listenBtn.textContent = 'Listen to Recipe';
-            };
-            utterance.onpause = () => {
-                listenBtn.textContent = 'Resume';
-            };
-            
-            speechSynthesis.speak(utterance);
-        }
-
         // Event listeners
         button.addEventListener('click', getScaledRecipe);
         downloadBtn.addEventListener('click', downloadRecipe);
-        listenBtn.addEventListener('click', speakRecipe);
 
         dishNameInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
