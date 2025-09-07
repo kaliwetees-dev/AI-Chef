@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virtual Chef</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
         body {
@@ -285,33 +286,16 @@
             }
 
             const recipeName = recipeNameEl.textContent;
-            const servings = servingsEl.textContent;
-            const ingredients = Array.from(ingredientsListEl.children).map(li => li.textContent).join('\n- ');
-            const process = Array.from(processListEl.children).map((li, index) => `${index + 1}. ${li.textContent}`).join('\n');
+            const element = resultContainer;
 
-            const fileContent = 
-`# ${recipeName}
+            const options = {
+                filename: `${recipeName.toLowerCase().replace(/\s/g, '-')}-recipe.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
 
-${servings}
-
-## Ingredients
-
-- ${ingredients}
-
-## Instructions
-
-${process}
-`;
-
-            const blob = new Blob([fileContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${recipeName.toLowerCase().replace(/\s/g, '-')}-recipe.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            html2pdf().set(options).from(element).save();
         }
 
         // Event listeners
